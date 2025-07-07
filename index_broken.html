@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ФАРМ БУСТЕР - Обучение медпредставителей</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @keyframes pulse-delay {
@@ -23,6 +23,18 @@
     
     <script type="text/babel">
         const { useState, useRef, useEffect } = React;
+        // Создаем компоненты иконок из lucide
+        const Icon = ({ name, className = "w-6 h-6" }) => {
+            const iconElement = document.createElement('div');
+            iconElement.innerHTML = lucide.icons[name];
+            const svg = iconElement.firstChild;
+            if (svg) {
+                svg.setAttribute('class', className);
+            }
+            return React.createElement('span', {
+                dangerouslySetInnerHTML: { __html: iconElement.innerHTML }
+            });
+        };
 
         const PharmBoosterApp = () => {
             const [currentScreen, setCurrentScreen] = useState('welcome');
@@ -47,7 +59,7 @@
                 {
                     id: 1,
                     title: "Планирование визитов",
-                    icon: "📅",
+                    icon: React.createElement(Calendar, { className: "w-6 h-6" }),
                     intro: "Научитесь эффективно планировать встречи с врачами, учитывая их график, специализацию и потребности.",
                     task: "Опишите, как бы вы спланировали визит к кардиологу в крупную городскую клинику. Учтите время визита, подготовку материалов и цели встречи.",
                     doctorRole: "строгий главврач кардиологического отделения",
@@ -56,7 +68,7 @@
                 {
                     id: 2,
                     title: "Презентация препарата",
-                    icon: "📋",
+                    icon: React.createElement(FileText, { className: "w-6 h-6" }),
                     intro: "Овладейте искусством презентации медицинских препаратов, делая акцент на преимуществах и клинической эффективности.",
                     task: "Подготовьте краткую презентацию нового антигипертензивного препарата. Выделите ключевые преимущества и клинические данные.",
                     doctorRole: "опытный терапевт с 20-летним стажем",
@@ -65,7 +77,7 @@
                 {
                     id: 3,
                     title: "Выявление потребностей",
-                    icon: "🎯",
+                    icon: React.createElement(Target, { className: "w-6 h-6" }),
                     intro: "Научитесь задавать правильные вопросы для выявления реальных потребностей врача и его пациентов.",
                     task: "Какие вопросы вы зададите эндокринологу, чтобы понять его потребности в препаратах для лечения диабета?",
                     doctorRole: "эндокринолог районной поликлиники",
@@ -74,7 +86,7 @@
                 {
                     id: 4,
                     title: "Работа с возражениями",
-                    icon: "💬",
+                    icon: React.createElement(MessageSquare, { className: "w-6 h-6" }),
                     intro: "Освойте техники работы с возражениями врачей, превращая сомнения в возможности.",
                     task: "Как вы ответите на возражение: 'Ваш препарат слишком дорогой, есть более дешевые аналоги'?",
                     doctorRole: "скептически настроенный заведующий отделением",
@@ -83,7 +95,7 @@
                 {
                     id: 5,
                     title: "Завершение визита",
-                    icon: "✅",
+                    icon: React.createElement(Check, { className: "w-6 h-6" }),
                     intro: "Научитесь правильно завершать встречу, оставляя положительное впечатление и договариваясь о следующих шагах.",
                     task: "Опишите, как вы завершите успешную встречу с врачом. Какие договоренности зафиксируете?",
                     doctorRole: "дружелюбный семейный врач",
@@ -92,7 +104,7 @@
                 {
                     id: 6,
                     title: "Пост-рефлексия и самооценка",
-                    icon: "🧠",
+                    icon: React.createElement(Brain, { className: "w-6 h-6" }),
                     intro: "Развивайте навык анализа проведенных встреч для постоянного улучшения результатов.",
                     task: "Проанализируйте свой последний визит. Что прошло хорошо? Что можно улучшить?",
                     doctorRole: "наставник-коуч по медицинским продажам",
@@ -316,102 +328,13 @@
                 }
             };
 
-            const copyToClipboard = () => {
-                const resultsText = allResults.map(result => {
-                    return `Марафон: ${result.marathonTitle}
-Дата: ${result.date}
-Оценки:
-- Структура: ${result.scores.structure}/5
-- Аргументация: ${result.scores.argumentation}/5
-- Работа с возражениями: ${result.scores.objectionHandling}/5
-Обратная связь: ${result.feedback}`;
-                }).join('\n\n---\n\n');
-
-                const fullText = `ФАРМ БУСТЕР - Результаты обучения
-Участник: ${userName}
-Должность: ${userPosition}
-Дата завершения: ${new Date().toLocaleString('ru-RU')}
-
-${resultsText}`;
-
-                navigator.clipboard.writeText(fullText).then(() => {
-                    setCopySuccess(true);
-                    setTimeout(() => setCopySuccess(false), 2000);
-                });
-            };
-
-            if (showResults) {
-                const totalScores = allResults.reduce((acc, result) => {
-                    acc.structure += result.scores.structure || 0;
-                    acc.argumentation += result.scores.argumentation || 0;
-                    acc.objectionHandling += result.scores.objectionHandling || 0;
-                    acc.count += 1;
-                    return acc;
-                }, { structure: 0, argumentation: 0, objectionHandling: 0, count: 0 });
-
-                const avgScores = {
-                    structure: totalScores.count > 0 ? (totalScores.structure / totalScores.count).toFixed(1) : 0,
-                    argumentation: totalScores.count > 0 ? (totalScores.argumentation / totalScores.count).toFixed(1) : 0,
-                    objectionHandling: totalScores.count > 0 ? (totalScores.objectionHandling / totalScores.count).toFixed(1) : 0
-                };
-
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-                        <div className="max-w-4xl mx-auto">
-                            <div className="bg-white rounded-2xl shadow-xl p-8">
-                                <div className="text-center mb-8">
-                                    <h1 className="text-3xl font-bold text-gray-800 mb-2">🎉 Поздравляем, {userName}!</h1>
-                                    <p className="text-gray-600">Вы успешно завершили программу ФАРМ БУСТЕР</p>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 mb-8">
-                                    <h2 className="text-xl font-semibold mb-4 text-center">📊 Ваша общая статистика</h2>
-                                    <div className="grid grid-cols-3 gap-6">
-                                        <div className="text-center">
-                                            <div className="text-3xl font-bold text-blue-600">{avgScores.structure}</div>
-                                            <div className="text-sm text-gray-600 mt-1">Структура диалога</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-3xl font-bold text-purple-600">{avgScores.argumentation}</div>
-                                            <div className="text-sm text-gray-600 mt-1">Аргументация</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-3xl font-bold text-green-600">{avgScores.objectionHandling}</div>
-                                            <div className="text-sm text-gray-600 mt-1">Работа с возражениями</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-4 justify-center">
-                                    <button
-                                        onClick={copyToClipboard}
-                                        className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                                    >
-                                        📋 {copySuccess ? 'Скопировано!' : 'Копировать результаты'}
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setCurrentScreen('dashboard');
-                                            setShowResults(false);
-                                        }}
-                                        className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                                    >
-                                        👥 К марафонам
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
             if (currentScreen === 'welcome') {
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
                             <div className="text-center mb-8">
                                 <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-4">
-                                    <span className="text-4xl">🏆</span>
+                                    {React.createElement(Award, { className: "w-10 h-10 text-blue-600" })}
                                 </div>
                                 <h1 className="text-3xl font-bold text-gray-800 mb-2">ФАРМ БУСТЕР</h1>
                                 <p className="text-gray-600">Обучающая программа для медпредставителей</p>
@@ -458,7 +381,7 @@ ${resultsText}`;
                                     className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                                 >
                                     Начать обучение
-                                    <span>➡️</span>
+                                    {React.createElement(ChevronRight, { className: "w-5 h-5" })}
                                 </button>
                             </div>
                         </div>
@@ -480,7 +403,8 @@ ${resultsText}`;
                                         onClick={() => setShowResults(true)}
                                         className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200"
                                     >
-                                        📊 Мои результаты
+                                        {React.createElement(BarChart3, { className: "w-5 h-5" })}
+                                        Мои результаты
                                     </button>
                                 </div>
 
@@ -511,12 +435,12 @@ ${resultsText}`;
                                                 }`}
                                             >
                                                 <div className="flex items-center justify-between mb-3">
-                                                    <div className={`text-2xl p-2 rounded-lg ${
+                                                    <div className={`p-2 rounded-lg ${
                                                         isCompleted ? 'bg-green-100' : 'bg-blue-100'
                                                     }`}>
                                                         {marathon.icon}
                                                     </div>
-                                                    {isCompleted && <span className="text-green-600 text-xl">✅</span>}
+                                                    {isCompleted && React.createElement(Check, { className: "w-5 h-5 text-green-600" })}
                                                 </div>
                                                 <h3 className="font-semibold text-left mb-1">{marathon.title}</h3>
                                                 <p className="text-sm text-gray-600 text-left">Марафон {index + 1} из 6</p>
@@ -537,7 +461,7 @@ ${resultsText}`;
                     <div className="max-w-4xl mx-auto">
                         <div className="bg-white rounded-2xl shadow-xl p-8">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="text-3xl p-2 bg-blue-100 rounded-lg">
+                                <div className="p-2 bg-blue-100 rounded-lg">
                                     {currentMarathonData.icon}
                                 </div>
                                 <div>
@@ -570,7 +494,8 @@ ${resultsText}`;
                                                 disabled={!userAnswer.trim()}
                                                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                             >
-                                                💬 Начать симуляцию визита
+                                                {React.createElement(MessageSquare, { className: "w-5 h-5" })}
+                                                Начать симуляцию визита
                                             </button>
                                         </div>
                                     </div>
@@ -628,7 +553,11 @@ ${resultsText}`;
                                             <div className="text-center">
                                                 <div className="inline-block p-3 bg-gray-100 rounded-lg">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="animate-pulse">⏳</div>
+                                                        <div className="animate-pulse flex gap-1">
+                                                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                                            <div className="w-2 h-2 bg-gray-400 rounded-full animation-delay-200"></div>
+                                                            <div className="w-2 h-2 bg-gray-400 rounded-full animation-delay-400"></div>
+                                                        </div>
                                                         <p className="text-sm text-gray-600">Врач думает...</p>
                                                     </div>
                                                 </div>
@@ -657,7 +586,8 @@ ${resultsText}`;
                                     
                                     {chatMessages.filter(m => m.role === 'user').length >= 2 && (
                                         <div className="text-center text-sm text-gray-600">
-                                            ⏰ Диалог скоро завершится...
+                                            {React.createElement(Clock, { className: "inline w-4 h-4 mr-1" })}
+                                            Диалог скоро завершится...
                                         </div>
                                     )}
                                 </div>
@@ -747,7 +677,7 @@ ${resultsText}`;
                                             className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                         >
                                             {currentMarathon < marathons.length - 1 ? 'Следующий марафон' : 'Завершить программу'}
-                                            <span>➡️</span>
+                                            {React.createElement(ChevronRight, { className: "w-5 h-5" })}
                                         </button>
                                     </div>
                                 </div>
